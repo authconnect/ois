@@ -1,0 +1,20 @@
+#!/bin/bash
+# Run the frstack.yml playbook
+# Any optional args are tags to pass to the ansible-playbook command (comma delimited)
+# TODO: Make this work across all environments
+#
+# See http://docs.ansible.com/intro_getting_started.html#host-key-checking
+
+TAGS=""
+
+if [ $# -gt 0 ]
+then
+	TAGS="--tags $1"
+fi
+
+#if [ $# -gt 0 ]
+#then
+#        DEBUG="$1"
+#fi
+echo ansible-playbook -vvv --user=chandan --private-key /home/chandan/.ssh/id_rsa -i etc/hosts --ask-sudo-pass ansible/frstack.yml $TAGS
+ansible-playbook -vvv --user=chandan --private-key /home/chandan/.ssh/id_rsa -i etc/hosts --ask-sudo-pass ansible/frstack.yml $TAGS > out.txt

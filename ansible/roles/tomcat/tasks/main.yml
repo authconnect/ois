@@ -1,0 +1,48 @@
+--- 
+# Create tomcat instance. Variables to pass in to this role (these can also be global defaults)
+# tomcat_parent - Parent directory for installation (example: /home/fr)
+# tomcat_instance - Intance name (e.g. tomcat-openam). 
+# tomcat_user - user id to run as 
+# tomcat_http_port
+# tomcat_https_port
+
+# Download tomcat 
+#- name: download tomcat 
+- include: ../../download.yml download_file="{{tomcat_archive}}" download_url="{{tomcat_download_url}}"
+
+- file: path="{{tomcat_parent}}" state=directory owner="{{ fr_user}}"
+
+- name: Extract tomcat archive
+  unarchive: dest="{{ tomcat_parent }}" src="{{download_dir }}/{{tomcat_archive}}" copy=no
+  
+- name: remove any old tomcat instance 
+  file: path="{{tomcat_instance_dir}}" state="absent"
+  
+- name: mv tomcat instance into place
+  command: mv -f "{{tomcat_parent}}/apache-tomcat-{{ tomcat_version }}" "{{ tomcat_instance_dir}}"
+  
+#- name: create instance dir
+#  command: mkdir -p {{ tomcat_instance_dir}}
+ 
+- name: Configure Tomcat server
+  template: src=server.xml dest="{{ tomcat_parent }}/{{ tomcat_instance }}/conf/"
+
+- name: Configure Tomcat users
+  template: src=tomcat-users.xml dest={{ tomcat_instance_dir }}/conf/
+
+# We dont really need this with JDK 8
+#- name: cp setenv.sh to set jvm params
+#  copy: src=setenv.sh dest="{{ tomcat_instance_dir }}/bin"
+
+- name: Install Tomcat init script
+  template: src="tomcat.service"  dest="/etc/systemd/system/{{tomcat_instance}}.service" 
+  
+- name: Change ownership of Tomcat installation
+  file: path={{ tomcat_instance_dir }} owner={{ tomcat_user }} state=directory recurse=yes
+
+
+# Enable but dont start since we probably have to stop to deploy openam
+- service: name={{ tomcat_instance }}.service enabled=yes
+
+#- name: wait for tomcat to start
+#  wait_for: port={{tomcat_http_port }} delay=10

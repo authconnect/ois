@@ -1,0 +1,35 @@
+---
+# Installs the Apache OpenAM agent
+# Needs to be run as root - as the Apache httpd conf dir is owned by non fr user
+
+  
+- name: Unpack archive
+  unarchive: src="{{staging_dir}}/apache_v24_agent.zip" dest="{{install_root}}" copy=no
+    
+- name: create password file
+  copy: src=agentpw dest="{{ webagents_home }}/agentpw"
+
+
+- name: Check if Apache is running
+  command: systemctl status apache2.service
+  ignore_errors: yes
+  register: service_apache_status
+
+- name: Stop apache
+  command: systemctl stop apache2.service
+  when : service_apache_status | succeeded
+
+  
+- name: Copy agent config 
+  copy: src=agent-config dest="{{ webagents_home }}/agent-config" 
+
+- name: Create agent config in openam using ssoadm
+  shell: "{{ install_root }}/ssoadmin/openam/bin/ssoadm create-agent --realm / --agentname apache1080  --agenttype WebAgent  --adminid amadmin --password-file {{ home_dir }}/etc/amadmin_pw --datafile {{ webagents_home }}/agent-config"
+  
+- name: Run agentadmin
+  shell: "{{ webagents_home }}/apache24_agent/bin/agentadmin --s /etc/apache2/apache2.conf https://{{ openam_fqdn }}:443/openam http://{{ openam_fqdn }}:1080 / apache1080 {{ webagents_home }}/agentpw --changeOwner --acceptLicence"
+
+- name: start apache
+  command: systemctl restart apache2.service
+
+

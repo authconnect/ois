@@ -1,0 +1,8 @@
+---
+# Download nightly forgerock builds to the ansible *host* (not the guest)
+
+# We use /vagrant on the host even if we are not using vagrant.
+# This is to be consisent with the vagrant build. See vars in groups_vars/all
+- copy: src=../bin/getnightly.sh dest=/tmp mode=0755
+- file: path=/vagrant state=directory mode=0755
+- command: /tmp/getnightly.sh chdir=/vagrant

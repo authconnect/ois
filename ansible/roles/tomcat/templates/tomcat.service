@@ -1,0 +1,23 @@
+# Systemd unit file for default tomcat
+# 
+# To create clones of this service:
+
+
+[Unit]
+Description=Tomcat instance {{tomcat_instance}}
+After=syslog.target network.target
+
+[Service]
+Type=forking
+#EnvironmentFile=/etc/tomcat/tomcat.conf
+#Environment="NAME="
+#EnvironmentFile=-/etc/sysconfig/tomcat
+ExecStart={{tomcat_instance_dir}}/bin/startup.sh
+ExecStop={{tomcat_instance_dir}}/bin/catalina.sh stop
+#SuccessExitStatus=143
+User={{tomcat_user}}
+#Group=tomcat
+
+
+[Install]
+WantedBy=multi-user.target

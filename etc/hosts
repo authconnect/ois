@@ -1,0 +1,8 @@
+[ois]
+localhost
+[oisa]
+localhost
+[haproxy]
+localhost
+[tomcat]
+localhost
