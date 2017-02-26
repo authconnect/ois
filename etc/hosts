@@ -6,3 +6,11 @@ localhost
 localhost
 [tomcat]
 localhost
+[openam]
+localhost
+[openid]
+localhost
+[openig]
+localhost
+[openidm]
+localhost
